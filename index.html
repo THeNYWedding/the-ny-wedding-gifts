@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste de Cadeaux - Nayma & Yunus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #8b5a3c;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .date {
+            color: #8b5a3c;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .category{
+            margin-top: 50px;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .gift-categories {
+            display: grid;
+            gap: 30px;
+        }
+
+        .category {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .category h2 {
+            color: #8b5a3c;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1c40f;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gifts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .gift-item {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gift-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .gift-item.reserved {
+            background-color: #f8f9fa;
+            border-color: #28a745;
+            opacity: 0.7;
+        }
+
+        .gift-item.reserved::after {
+            content: "✓ RÉSERVÉ";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .gift-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .gift-description {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .gift-price {
+            color: #8b5a3c;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .gift-link {
+            margin-top: 10px;
+        }
+
+        .gift-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .gift-link a:hover {
+            text-decoration: underline;
+        }
+
+        .reserve-btn {
+            background: #8b5a3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            width: 100%;
+        }
+
+        .reserve-btn:hover {
+            background: #6d4528;
+        }
+
+        .reserve-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .confirm-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #155724;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .instructions {
+                padding: 15px;
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+            }
+
+            .stats {
+                padding: 12px;
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+            }
+            
+            .gifts-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .category {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .category h2 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .gift-item {
+                padding: 15px;
+            }
+
+            .gift-name {
+                font-size: 1.1rem;
+            }
+
+            .gift-description {
+                font-size: 0.9rem;
+            }
+
+            .gift-price {
+                font-size: 1rem;
+            }
+
+            .reserve-btn {
+                padding: 12px 15px;
+                font-size: 0.95rem;
+                margin-top: 12px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                padding: 20px;
+                width: 95%;
+                max-width: none;
+            }
+
+            .modal input {
+                padding: 12px;
+                font-size: 16px; /* Évite le zoom sur iOS */
+                margin: 8px 0;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-btn {
+                padding: 15px;
+                font-size: 1rem;
+            }
+
+            .footer {
+                padding: 20px 15px;
+                margin-top: 30px;
+                font-size: 0.95rem;
+            }
+
+            .gift-item.reserved::after {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+                top: 8px;
+                right: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .gift-item {
+                padding: 12px;
+            }
+
+            .category {
+                padding: 15px 10px;
+            }
+
+            .modal-content {
+                margin: 3% auto;
+                padding: 15px;
+            }
+
+            .reserve-btn {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤍 Liste de Cadeaux 🤍</h1>
+            <p>Nayma & Yunus</p>
+            <div class="date">18 Octobre 2025</div>
+        </div>
+
+        <div class="instructions">
+            <p><strong>Comment ça marche ?</strong></p>
+            <p>Cliquez sur "Réserver" pour le cadeau que vous souhaitez offrir. Une fois réservé, il ne sera plus disponible pour les autres invités. N'oubliez pas d'indiquer votre nom !</p>
+        </div>
+
+        <div id="loadingMessage" class="loading">
+            Chargement de la liste des cadeaux...
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;">
+            Erreur lors du chargement de la liste des cadeaux. Veuillez actualiser la page.
+        </div>
+
+        <div id="statsContainer" class="stats" style="display: none;">
+            <p><strong>📊 Statistiques :</strong> <span id="reservedCount">0</span> cadeaux réservés sur <span id="totalCount">0</span></p>
+        </div>
+
+        <div id="giftCategories" class="gift-categories" style="display: none;">
+            <!-- Les catégories seront générées dynamiquement -->
+        </div>
+
+        <div class="footer">
+            <p>Merci de partager cette journée spéciale avec nous ! 💕</p>
+            <p>Vos présences sont les plus beaux des cadeaux.</p>
+        </div>
+    </div>
+
+    <!-- Modal de réservation -->
+    <div id="reservationModal" class="modal">
+        <div class="modal-content">
+            <h3>Réserver ce cadeau</h3>
+            <p id="modalGiftName"></p>
+            <input type="text" id="guestName" placeholder="Votre prénom et nom" required>
+            <input type="email" id="guestEmail" placeholder="Votre email (optionnel)">
+            <div class="modal-buttons">
+                <button class="modal-btn confirm-btn" onclick="confirmReservation()">Confirmer</button>
+                <button class="modal-btn cancel-btn" onclick="closeModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ⚠️ REMPLACEZ CES VALEURS PAR LES VÔTRES DEPUIS VOTRE DASHBOARD SUPABASE
+        const SUPABASE_URL = 'https://shpcxbnhyfhfmyzzpamz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocGN4Ym5oeWZoZm15enpwYW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MjM1MDEsImV4cCI6MjA3NDQ5OTUwMX0.kc67-RbmoAZ4rscWtyfv2g_ekQ8G3Rh3aWhfjzuyXaY';
+        
+        // Initialiser Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let giftsData = [];
+        let currentGiftId = null;
+
+        // Charger les données depuis Supabase uniquement
+        async function loadGiftsData() {
+            try {
+                // Charger depuis la table gifts de Supabase
+                const { data: gifts, error: giftsError } = await supabase
+                    .from('gifts')
+                    .select('*')
+                    .order('id', { ascending: true });
+                
+                if (giftsError) {
+                    console.error('Erreur lors du chargement des cadeaux:', giftsError);
+                    showError();
+                    return;
+                }
+                
+                // Convertir les données Supabase au format attendu
+                giftsData = gifts.map(gift => ({
+                    id: gift.id,
+                    name: gift.name,
+                    description: gift.description,
+                    category: gift.category,
+                    categoryIcon: gift.category_icon || '🎁',
+                    buttonText: gift.button_text || 'Réserver ce cadeau'
+                }));
+                
+                console.log('Cadeaux chargés depuis Supabase:', giftsData.length);
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement:', error);
+                showError();
+                return;
+            }
+            
+            await renderGifts();
+            await updateStats();
+            hideLoading();
+        }
+
+        // Afficher l'erreur
+        function showError() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        // Masquer le loading
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('giftCategories').style.display = 'block';
+            document.getElementById('statsContainer').style.display = 'block';
+        }
+
+        // Générer le HTML pour tous les cadeaux
+        async function renderGifts() {
+            const categoriesContainer = document.getElementById('giftCategories');
+            const reservations = await loadReservations();
+            
+            // Grouper les cadeaux par catégorie
+            const categories = {};
+            giftsData.forEach(gift => {
+                if (!categories[gift.category]) {
+                    categories[gift.category] = {
+                        name: gift.category,
+                        icon: gift.categoryIcon || '🎁',
+                        gifts: []
+                    };
+                }
+                categories[gift.category].gifts.push(gift);
+            });
+            
+            // Générer le HTML
+            categoriesContainer.innerHTML = '';
+            Object.values(categories).forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                
+                categoryDiv.innerHTML = `
+                    <h2>${category.icon} ${category.name}</h2>
+                    <div class="gifts-grid">
+                        ${category.gifts.map(gift => {
+                            const isReserved = reservations[gift.id];
+                            return `
+                                <div class="gift-item ${isReserved ? 'reserved' : ''}" data-id="${gift.id}">
+                                    <div class="gift-name">${gift.name}</div>
+                                    <div class="gift-description">${gift.description}</div>
+                                    <button class="reserve-btn" ${isReserved ? 'disabled' : ''}>
+                                        ${isReserved ? `Réservé par ${isReserved.name}` : (gift.buttonText || 'Réserver ce cadeau')}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                categoriesContainer.appendChild(categoryDiv);
+            });
+            
+            // Ajouter les événements de clic
+            addEventListeners();
+        }
+
+        // Ajouter les événements de clic
+        function addEventListeners() {
+            document.querySelectorAll('.reserve-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (this.disabled) return;
+                    
+                    const giftItem = this.closest('.gift-item');
+                    const giftId = giftItem.dataset.id;
+                    const gift = giftsData.find(g => g.id == giftId);
+                    
+                    if (gift) {
+                        openReservationModal(giftId, gift.name);
+                    }
+                });
+            });
+        }
+
+        // Mettre à jour les statistiques
+        async function updateStats() {
+            const reservations = await loadReservations();
+            const totalGifts = giftsData.length;
+            const reservedGifts = Object.keys(reservations).length;
+            
+            document.getElementById('totalCount').textContent = totalGifts;
+            document.getElementById('reservedCount').textContent = reservedGifts;
+        }
+
+        // Charger les réservations depuis Supabase
+        async function loadReservations() {
+            try {
+                const { data: reservations, error } = await supabase
+                    .from('reservations')
+                    .select('*');
+                
+                if (error) {
+                    console.error('Erreur Supabase:', error);
+                    return {};
+                }
+                
+                // Convertir en format compatible avec l'ancien système
+                const reservationsMap = {};
+                reservations.forEach(reservation => {
+                    reservationsMap[reservation.gift_id] = {
+                        name: reservation.guest_name,
+                        email: reservation.guest_email,
+                        date: reservation.reserved_at
+                    };
+                });
+                
+                return reservationsMap;
+            } catch (error) {
+                console.error('Erreur lors du chargement des réservations:', error);
+                return {};
+            }
+        }
+
+        // Sauvegarder une réservation dans Supabase
+        async function saveReservationToSupabase(giftId, guestName, guestEmail) {
+            try {
+                const { data, error } = await supabase
+                    .from('reservations')
+                    .insert([
+                        {
+                            gift_id: parseInt(giftId),
+                            guest_name: guestName,
+                            guest_email: guestEmail
+                        }
+                    ]);
+                
+                if (error) {
+                    console.error('Erreur lors de la sauvegarde:', error);
+                    throw error;
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Erreur Supabase:', error);
+                throw error;
+            }
+        }
+
+        // Écouter les changements en temps réel
+        function subscribeToReservations() {
+            supabase
+                .channel('reservations_changes')
+                .on('postgres_changes', 
+                    { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'reservations' 
+                    }, 
+                    (payload) => {
+                        console.log('Nouvelle réservation reçue!', payload);
+                        // Recharger l'affichage avec les nouvelles données
+                        loadReservationsAndUpdate();
+                    }
+                )
+                .subscribe();
+        }
+
+        // Charger les réservations et mettre à jour l'affichage
+        async function loadReservationsAndUpdate() {
+            const reservations = await loadReservations();
+            updateGiftsWithReservations(reservations);
+            updateStats();
+        }
+
+        // Mettre à jour l'affichage avec les réservations
+        function updateGiftsWithReservations(reservations) {
+            Object.keys(reservations).forEach(giftId => {
+                const giftItem = document.querySelector(`[data-id="${giftId}"]`);
+                if (giftItem && !giftItem.classList.contains('reserved')) {
+                    giftItem.classList.add('reserved');
+                    const button = giftItem.querySelector('.reserve-btn');
+                    button.textContent = `Réservé par ${reservations[giftId].name}`;
+                    button.disabled = true;
+                }
+            });
+        }
+
+        // Ouvrir le modal de réservation
+        function openReservationModal(giftId, giftName) {
+            currentGiftId = giftId;
+            document.getElementById('modalGiftName').textContent = giftName;
+            document.getElementById('guestName').value = '';
+            document.getElementById('guestEmail').value = '';
+            document.getElementById('reservationModal').style.display = 'block';
+        }
+
+        // Fermer le modal
+        function closeModal() {
+            document.getElementById('reservationModal').style.display = 'none';
+            currentGiftId = null;
+        }
+
+        // Confirmer la réservation
+        async function confirmReservation() {
+            const guestName = document.getElementById('guestName').value.trim();
+            const guestEmail = document.getElementById('guestEmail').value.trim();
+            
+            if (!guestName) {
+                alert('Veuillez indiquer votre nom.');
+                return;
+            }
+
+            try {
+                // Sauvegarder dans Supabase
+                await saveReservationToSupabase(currentGiftId, guestName, guestEmail);
+                
+                // Mettre à jour l'interface immédiatement
+                const giftItem = document.querySelector(`[data-id="${currentGiftId}"]`);
+                giftItem.classList.add('reserved');
+                const button = giftItem.querySelector('.reserve-btn');
+                button.textContent = `Réservé par ${guestName}`;
+                button.disabled = true;
+                
+                // Mettre à jour les stats
+                await updateStats();
+                
+                closeModal();
+                alert('Merci ! Votre réservation a été enregistrée.');
+                
+            } catch (error) {
+                console.error('Erreur lors de la réservation:', error);
+                alert('Une erreur s\'est produite. Veuillez réessayer.');
+            }
+        }
+
+        // Événements
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Charger les données des cadeaux
+            await loadGiftsData();
+            
+            // S'abonner aux changements en temps réel
+            subscribeToReservations();
+            
+            // Fermer le modal en cliquant à l'extérieur
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('reservationModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Gérer la touche Échap
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
