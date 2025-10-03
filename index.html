@@ -678,7 +678,7 @@
                 if (giftItem && !giftItem.classList.contains('reserved')) {
                     giftItem.classList.add('reserved');
                     const button = giftItem.querySelector('.reserve-btn');
-                    button.textContent = `Réservé par ${reservations[giftId].name}`;
+                    button.textContent = `Réservé`;
                     button.disabled = true;
                 }
             });
@@ -717,7 +717,7 @@
                 const giftItem = document.querySelector(`[data-id="${currentGiftId}"]`);
                 giftItem.classList.add('reserved');
                 const button = giftItem.querySelector('.reserve-btn');
-                button.textContent = `Réservé par ${guestName}`;
+                button.textContent = `Réservé`;
                 button.disabled = true;
                 
                 // Mettre à jour les stats
