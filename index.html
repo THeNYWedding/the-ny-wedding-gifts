@@ -549,7 +549,7 @@
                                     <div class="gift-name">${gift.name}</div>
                                     <div class="gift-description">${gift.description}</div>
                                     <button class="reserve-btn" ${isReserved ? 'disabled' : ''}>
-                                        ${isReserved ? `Réservé par ${isReserved.name}` : (gift.buttonText || 'Réserver ce cadeau')}
+                                        ${isReserved ? 'Réservé' : (gift.buttonText || 'Réserver ce cadeau')}
                                     </button>
                                 </div>
                             `;
